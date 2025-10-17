@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Invoice, Signature
+from .models import Invoice, Signature, Stamp
 
 @admin.register(Signature)
 class SignatureAdmin(admin.ModelAdmin):
@@ -12,3 +12,8 @@ class InvoiceAdmin(admin.ModelAdmin):
     list_filter = ['invoice_date', 'state']
     search_fields = ['invoice_number', 'client_name']
     readonly_fields = ['invoice_number', 'cgst_amount', 'sgst_amount', 'igst_amount', 'round_off', 'total_amount']
+
+@admin.register(Stamp)
+class StampAdmin(admin.ModelAdmin):
+    list_display = ['name', 'created_at']
+    search_fields = ['name']

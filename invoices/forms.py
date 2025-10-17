@@ -42,7 +42,7 @@ class InvoiceForm(forms.ModelForm):
             'sac_code', 'client_name', 'client_address', 
             'contract_no', 'contract_date', 'service_description',
             'total_amount', 'state', 'cgst_rate', 'sgst_rate', 
-            'igst_rate', 'signature'
+            'igst_rate', 'signature', 'include_stamp', 'stamp'
         ]
         widgets = {
             'sac_code': forms.TextInput(attrs={
@@ -96,6 +96,8 @@ class InvoiceForm(forms.ModelForm):
             'signature': forms.Select(attrs={
                 'class': 'form-control'
             }),
+            'include_stamp': forms.CheckboxInput(attrs={'class': 'form-check-input', 'id': 'id_include_stamp'}),
+            'stamp': forms.Select(attrs={'class': 'form-control', 'id': 'id_stamp'}),
         }
         labels = {
             'total_amount': 'Total Amount (Including GST)',

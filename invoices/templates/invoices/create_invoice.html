@@ -158,7 +158,32 @@
                     <small class="text-muted d-block">* Upload signatures in Django Admin first</small>
                 </div>
             </div>
-            
+            <!-- inside Signature Section of create_invoice.html -->
+<div class="mb-3 form-check">
+  {{ form.include_stamp }} <label class="form-check-label" for="id_include_stamp">Include Stamp (show next to signature)</label>
+</div>
+
+<div class="mb-3" id="stamp_selector" style="display: none;">
+  <label class="form-label">Select Stamp</label>
+  {{ form.stamp }}
+  <small class="text-muted d-block">* Upload stamps in Django Admin first</small>
+</div>
+
+<script>
+  function toggleStampSelector() {
+      const chk = document.getElementById('id_include_stamp');
+      const sel = document.getElementById('stamp_selector');
+      if (chk && sel) {
+          sel.style.display = chk.checked ? 'block' : 'none';
+      }
+  }
+  // run on load and on change
+  window.addEventListener('load', toggleStampSelector);
+  document.addEventListener('change', function(e){
+      if (e.target && e.target.id === 'id_include_stamp') toggleStampSelector();
+  });
+</script>
+
             <div class="text-center mt-4">
                 <button type="submit" class="btn btn-generate">Generate Invoice</button>
             </div>
