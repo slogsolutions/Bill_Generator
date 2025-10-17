@@ -60,7 +60,7 @@
                     <td>₹ {{ invoice.total_amount }}</td>
                     <td class="action-btns">
                         <a href="{% url 'invoice_preview' invoice.pk %}" class="btn btn-sm btn-primary">View</a>
-                        <a href="{% url 'download_invoice_pdf' invoice.pk %}" class="btn btn-sm btn-success">PDF</a>
+                        
 
                         <!-- Delete form: uses POST to avoid accidental GET deletes -->
                         <form id="delete-form-{{ invoice.pk }}" action="{% url 'invoice_delete' invoice.pk %}" method="post" style="display:inline;">
