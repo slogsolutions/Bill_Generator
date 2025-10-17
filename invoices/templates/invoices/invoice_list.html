@@ -21,13 +21,26 @@
             color: white;
             margin-bottom: 20px;
         }
+        /* smaller gap for action buttons */
+        .action-btns .btn { margin-right: 6px; }
     </style>
+
+    <script>
+      // confirm delete before submitting the form
+      function confirmDelete(formId, invoiceNumber) {
+        const ok = confirm('Delete invoice "' + invoiceNumber + '"? This action cannot be undone.');
+        if (ok) document.getElementById(formId).submit();
+      }
+    </script>
 </head>
 <body>
     <div class="container">
         <h1 class="mb-4">Invoice Management System</h1>
         <a href="{% url 'create_invoice' %}" class="btn btn-create">+ Create New Invoice</a>
-        
+        <div class="text-end mb-3">
+    <a href="{% url 'logout' %}" class="btn btn-danger btn-sm">Logout</a>
+</div>
+
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -45,9 +58,20 @@
                     <td>{{ invoice.invoice_date|date:"d/m/Y" }}</td>
                     <td>{{ invoice.client_name|truncatewords:5 }}</td>
                     <td>₹ {{ invoice.total_amount }}</td>
-                    <td>
+                    <td class="action-btns">
                         <a href="{% url 'invoice_preview' invoice.pk %}" class="btn btn-sm btn-primary">View</a>
                         <a href="{% url 'download_invoice_pdf' invoice.pk %}" class="btn btn-sm btn-success">PDF</a>
+
+                        <!-- Delete form: uses POST to avoid accidental GET deletes -->
+                        <form id="delete-form-{{ invoice.pk }}" action="{% url 'invoice_delete' invoice.pk %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-danger"
+                                onclick="confirmDelete('delete-form-{{ invoice.pk }}', '{{ invoice.invoice_number }}')">
+                                Delete
+                            </button>
+                        </form>
                     </td>
                 </tr>
                 {% empty %}
