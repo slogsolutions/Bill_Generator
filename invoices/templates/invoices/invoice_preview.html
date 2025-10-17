@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Preview - {{ invoice.invoice_number }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    {% load static %}
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet">
+</head>
+<body>
+    <div class="btn-container no-print">
+        <a href="{% url 'download_invoice_pdf' invoice.pk %}" class="btn-download">Download PDF</a>
+        <a href="{% url 'create_invoice' %}" class="btn-new">Create New Invoice</a>
+        <button onclick="window.print()" class="btn-print">Print</button>
+    </div>
+
+   <div class="invoice-container">
+        <!-- Header: a table with thick outer border and vertical divider -->
+        <table class="invoice-header" role="presentation" aria-hidden="true">
+            <tr>
+                <td class="company-cell">
+                    <div class="company-name">SLOG SOLUTIONS PVT. LTD.</div>
+                    <div class="company-details">
+                        1, Institution of Engineers, Near PITCUL, ISBT,<br />
+                        Dehradun Uttarakhand.<br />
+                        M-7456000240/41<br />
+                        <strong>GSTIN-</strong> 05ABACS9144F1ZF &nbsp;|&nbsp; <strong>SAC CODE:</strong> {{ invoice.sac_code }}
+                    </div>
+                </td>
+
+                <td class="invoice-cell">
+                    <div class="invoice-title-box">INVOICE</div>
+
+                    <table class="invoice-details" role="presentation" aria-hidden="true">
+                        <tr>
+                            <td>INVOICE NO</td>
+                            <td>DATE</td>
+                        </tr>
+                        <tr>
+                            <td>{{ invoice.invoice_number }}</td>
+                            <td>{{ invoice.invoice_date|date:"d.m.Y" }}</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+
+        <!-- Client Section -->
+        <div class="client-section">
+            <div>
+                {{ invoice.client_name }}<br>
+                {{ invoice.client_address }}
+            </div>
+        </div>
+
+        <!-- Service Description Table -->
+        <table class="service-table">
+            <thead>
+                <tr>
+                    <th class="desc-col">DESCRIPTION OF SERVICE</th>
+                    <th class="amount-col">AMOUNT (GST Bifurcation)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="desc-col">
+                        {% if invoice.contract_no %}
+                        <strong>Contract No:</strong> {{ invoice.contract_no }}<br>
+                        {% endif %}
+                        {% if invoice.contract_date %}
+                        <strong>Contract Date:</strong> {{ invoice.contract_date|date:"d-M-Y" }}<br>
+                        {% endif %}
+                        <br>
+                        {{ invoice.service_description|linebreaks }}
+                    </td>
+                    <td class="amount-col">{{ invoice.base_amount|floatformat:2 }}</td>
+                </tr>
+                {% if invoice.state|lower == 'uttarakhand' %}
+                <tr>
+                    <td>CGST @ {{ invoice.cgst_rate }}%</td>
+                    <td class="amount-col">{{ invoice.cgst_amount|floatformat:2 }}</td>
+                </tr>
+                <tr>
+                    <td>SGST @ {{ invoice.sgst_rate }}%</td>
+                    <td class="amount-col">{{ invoice.sgst_amount|floatformat:2 }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td>IGST @ {{ invoice.igst_rate }}%</td>
+                    <td class="amount-col">{{ invoice.igst_amount|floatformat:2 }}</td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <td>Round Off</td>
+                    <td class="amount-col">{{ invoice.round_off|floatformat:2 }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Total</strong></td>
+                    <td class="amount-col"><strong>{{ invoice.total_amount|floatformat:2 }}</strong></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Amount in Words -->
+        <div class="amount-words">
+            (In words) Rs. {{ amount_in_words }} only.
+        </div>
+
+        <!-- Signature Section -->
+        <div class="signature-section">
+            <div class="signature-content">
+                <div><strong>For SLOG Solutions Pvt. Ltd.</strong></div>
+                {% if invoice.signature and invoice.signature.image %}
+                <img src="{{ invoice.signature.image.url }}" alt="Signature">
+                {% else %}
+                <div style="height: 80px;"></div>
+                {% endif %}
+                <div><strong>Authorize Signature</strong></div>
+            </div>
+        </div>
+
+        <!-- Footer Section -->
+        <div class="footer-section">
+            <div class="footer-left">
+                FOR NEFT/RTGS
+            </div>
+            <div class="footer-right">
+                <strong>Bank Account Details</strong><br>
+                Bank Name: Nainital Bank | Account number: 1011000000000248<br>
+                IFSC Code: NTBI0DEH101 | PAN No: ABACS9144F | GST No: 05ABACS9144F1ZF
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

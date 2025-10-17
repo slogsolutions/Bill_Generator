@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Invoice</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        .invoice-form {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .form-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .form-section:last-child {
+            border-bottom: none;
+        }
+        .section-title {
+            color: #333;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .btn-generate {
+            background-color: #28a745;
+            color: white;
+            padding: 12px 40px;
+            font-size: 1.1em;
+        }
+        .btn-generate:hover {
+            background-color: #218838;
+        }
+    </style>
+    <script>
+        function updateGSTFields() {
+            const state = document.getElementById('id_state').value;
+            const cgstDiv = document.getElementById('cgst_div');
+            const sgstDiv = document.getElementById('sgst_div');
+            const igstDiv = document.getElementById('igst_div');
+            
+            if (state.toLowerCase() === 'uttarakhand') {
+                cgstDiv.style.display = 'block';
+                sgstDiv.style.display = 'block';
+                igstDiv.style.display = 'none';
+            } else {
+                cgstDiv.style.display = 'none';
+                sgstDiv.style.display = 'none';
+                igstDiv.style.display = 'block';
+            }
+        }
+        
+        window.onload = function() {
+            updateGSTFields();
+            document.getElementById('id_state').addEventListener('change', updateGSTFields);
+        }
+    </script>
+</head>
+<body>
+    <div class="invoice-form">
+        <h1 class="text-center mb-4">SLOG Solutions - Invoice Generator</h1>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- Header Section -->
+            <div class="form-section">
+                <div class="section-title">📋 Invoice Header</div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label class="form-label">SAC Code</label>
+                        {{ form.sac_code }}
+                    </div>
+                </div>
+                <small class="text-muted">* Invoice number and date will be auto-generated</small>
+            </div>
+            
+            <!-- Client Details Section -->
+            <div class="form-section">
+                <div class="section-title">👤 Client Details</div>
+                <div class="mb-3">
+                    <label class="form-label">Client Name/Designation</label>
+                    {{ form.client_name }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Client Address</label>
+                    {{ form.client_address }}
+                </div>
+            </div>
+            
+            <!-- Service Description Section -->
+            <div class="form-section">
+                <div class="section-title">📝 Service Description</div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Contract Number (Optional)</label>
+                        {{ form.contract_no }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Contract Date (Optional)</label>
+                        {{ form.contract_date }}
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Service Description</label>
+                    {{ form.service_description }}
+                </div>
+            </div>
+            
+            <!-- Amount Section -->
+            <div class="form-section">
+                <div class="section-title">💰 Amount & GST Details</div>
+                <div class="mb-3">
+    <label class="form-label">Total Amount (₹) - Including GST</label>
+    {{ form.total_amount }}
+    <small class="text-muted d-block">* Enter final amount including GST. Base and GST will be calculated automatically.</small>
+</div>
+
+                
+                <div class="mb-3">
+                    <label class="form-label">Select State</label>
+                    {{ form.state }}
+                    <small class="text-muted d-block">* Uttarakhand: CGST+SGST | Other States: IGST</small>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4" id="cgst_div">
+                        <label class="form-label">CGST Rate (%)</label>
+                        {{ form.cgst_rate }}
+                    </div>
+                    <div class="col-md-4" id="sgst_div">
+                        <label class="form-label">SGST Rate (%)</label>
+                        {{ form.sgst_rate }}
+                    </div>
+                    <div class="col-md-4" id="igst_div">
+                        <label class="form-label">IGST Rate (%)</label>
+                        {{ form.igst_rate }}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Signature Section -->
+            <div class="form-section">
+                <div class="section-title">✍️ Signature</div>
+                <div class="mb-3">
+                    <label class="form-label">Select Authorized Signature</label>
+                    {{ form.signature }}
+                    <small class="text-muted d-block">* Upload signatures in Django Admin first</small>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-generate">Generate Invoice</button>
+            </div>
+        </form>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
