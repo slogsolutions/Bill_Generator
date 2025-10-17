@@ -19,7 +19,8 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
-
+from functools import wraps
+from django.shortcuts import redirect
 # xhtml2pdf imports (new)
 from django.template.loader import get_template
 from django.conf import settings
@@ -27,6 +28,13 @@ from xhtml2pdf import pisa
 import os
 
 # ======== Simple Hardcoded Login ========
+def require_login_session(view_func):
+    @wraps(view_func)
+    def _wrapped(request, *args, **kwargs):
+        if not request.session.get("is_authenticated"):
+            return redirect('login')
+        return view_func(request, *args, **kwargs)
+    return _wrapped
 
 def login_view(request):
     # Hardcoded credentials
@@ -38,8 +46,9 @@ def login_view(request):
         password = request.POST.get("password")
 
         if username == HARDCODED_USERNAME and password == HARDCODED_PASSWORD:
-            # Create a dummy user in session (no DB user)
+            
             request.session["is_authenticated"] = True
+            request.session.cycle_key()
             return redirect("invoice_list")
         else:
             messages.error(request, "Invalid username or password")
@@ -51,6 +60,9 @@ def logout_view(request):
     request.session.flush()
     return redirect("login")
 
+@require_login_session
+@require_POST
+
 def invoice_delete(request, pk):
     """
     Delete an invoice. Only accepts POST (safe).
@@ -61,6 +73,7 @@ def invoice_delete(request, pk):
     # optional: you can add messages framework to show a success toast
     return redirect(reverse('invoice_list'))
 
+@require_login_session
 def create_invoice(request):
     if not request.session.get("is_authenticated"):
         return redirect('login')
@@ -74,6 +87,7 @@ def create_invoice(request):
     
     return render(request, 'invoices/create_invoice.html', {'form': form})
 
+@require_login_session
 def invoice_preview(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
     
@@ -86,13 +100,8 @@ def invoice_preview(request, pk):
     }
     
     return render(request, 'invoices/invoice_preview.html', context)
-# Auto logout on server restart (optional)
-def clear_all_sessions():
-    from django.contrib.sessions.models import Session
-    Session.objects.all().delete()
 
-clear_all_sessions()
-
+@require_login_session
 def invoice_list(request):
     # if not logged in via our simple session flag, send to login page
     if not request.session.get("is_authenticated"):
@@ -124,7 +133,7 @@ def link_callback(uri, rel):
     # return unchanged for absolute paths or external URLs
     return uri
 
-
+@require_login_session
 def download_invoice_pdf(request, pk):
     """
     Generates a PDF using xhtml2pdf (pisa) from the same template used for preview.
